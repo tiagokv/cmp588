@@ -12,6 +12,7 @@ class BinaryHeap{
         std::vector<std::shared_ptr<T>> keys;
         std::vector<int> heap;
         std::vector<int> heap_inv;
+        unsigned int nro_swaps;
             
         void shiftUp(int i){
             int k = i;
@@ -56,10 +57,12 @@ class BinaryHeap{
             heap_inv[heap[from]] = to;
             heap_inv[heap[to]] = from;
             std::iter_swap(begin(heap) + from, begin(heap) + to);
+
+            nro_swaps++;
         };
 
     public:
-        BinaryHeap(int maxSize){
+        BinaryHeap(int maxSize):nro_swaps(0){
             std::generate_n(std::back_inserter(keys), maxSize, [](){return nullptr;});
             std::generate_n(std::back_inserter(heap_inv), maxSize, [](){return -1;});
         };
@@ -106,6 +109,10 @@ class BinaryHeap{
         };
 
         bool empty(){ return heap.size() == 0; };
+
+        unsigned int get_nro_swaps() const{
+            return nro_swaps;
+        }
 };
 
 #endif
