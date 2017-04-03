@@ -8,14 +8,14 @@ using namespace std;
 
 int main(int argc, char** argv){
 	const int max_repetitions = 1;
-	const int max_iterations = 30;
+	const int max_iterations = 5;
 	// format of output 
 
 	cout << "# i T(i) I(i)" << endl;
 
 	for(int iteration = 0; iteration < max_iterations; iteration++){
 		
-		unsigned int swaps = 0;
+		unsigned long int swaps = 0;
 		
 		chrono::milliseconds aggregated_time;
 		for(int repetition = 0; repetition < max_repetitions; repetition++){
@@ -28,11 +28,12 @@ int main(int argc, char** argv){
 				bh.push( i , i );
 			}
 
-			if( top > 0 ) bh.push( 0 , 0 );
+			if( top > 0 ){
+				bh.push( 0 , 0 );
+			} 
 
 			aggregated_time += chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now()-t);
 			swaps = bh.get_nro_swaps();
-
 		}
 		// medição
 		cout << iteration << " " << (aggregated_time.count() / max_repetitions)

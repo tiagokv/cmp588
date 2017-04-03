@@ -10,9 +10,9 @@ template<class T>
 class BinaryHeap{
 	private:
         std::vector<std::shared_ptr<T>> keys;
-        std::vector<int> heap;
-        std::vector<int> heap_inv;
-        unsigned int nro_swaps;
+        std::vector<unsigned int> heap;
+        std::vector<unsigned int> heap_inv;
+        unsigned long nro_swaps;
             
         void shiftUp(int i){
             int k = i;
@@ -45,13 +45,13 @@ class BinaryHeap{
             }
         }
 
-        bool isRoot(int i){ return i == 0; };
-        int parent(int i){ return (i-1)/2; };
-        int right(int i){ return 2*i + 2; };
-        int left(int i){ return 2*i + 1; };
-        int numChildren(int i){ return std::max(std::min(static_cast<int>(heap.size() - left(i)), 2 ) , 0 ); };
+        bool isRoot(unsigned int i){ return i == 0; };
+        int parent(unsigned int i){ return (i-1)/2; };
+        int right(unsigned int i){ return 2*i + 2; };
+        int left(unsigned int i){ return 2*i + 1; };
+        int numChildren(unsigned int i){ return std::max(std::min(static_cast<int>(heap.size() - left(i)), 2 ) , 0 ); };
 
-        void swap(int from, int to){
+        void swap(unsigned int from, unsigned int to){
             if( from == to ) return;
 
             heap_inv[heap[from]] = to;
@@ -62,12 +62,12 @@ class BinaryHeap{
         };
 
     public:
-        BinaryHeap(int maxSize):nro_swaps(0){
+        BinaryHeap(unsigned int maxSize):nro_swaps(0){
             std::generate_n(std::back_inserter(keys), maxSize, [](){return nullptr;});
             std::generate_n(std::back_inserter(heap_inv), maxSize, [](){return -1;});
         };
 
-        void push(int p, const T& value){
+        void push(unsigned int p, const T& value){
             if( p > keys.size() ) throw std::length_error("exceeded size");
 
             keys[p] = std::make_shared<T>(value);
@@ -77,7 +77,7 @@ class BinaryHeap{
             shiftUp(heap_inv[p]);
         }
 
-        void update(int p, const T& value){
+        void update(unsigned int p, const T& value){
             if( *keys[p] < value ){
                 keys[p] = std::make_shared<T>(value);
                 shiftDown(heap_inv[p]);
@@ -110,7 +110,7 @@ class BinaryHeap{
 
         bool empty(){ return heap.size() == 0; };
 
-        unsigned int get_nro_swaps() const{
+        unsigned long int get_nro_swaps() const{
             return nro_swaps;
         }
 };
