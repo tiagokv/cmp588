@@ -6,38 +6,46 @@
 
 using namespace std;
 
+int execute(BinaryHeap<unsigned int>& bh, unsigned int& top, unsigned int& qt_numbers){
+
+	while(qt_numbers--){
+		bh.push( top , top );
+		top--;
+	}
+
+	return bh.get_nro_swaps();
+}
+
 int main(int argc, char** argv){
 	const int max_repetitions = 1;
 	const int max_iterations = 5;
 	// format of output 
+	unsigned int top = pow(2, max_iterations);
 
-	cout << "# i T(i) I(i)" << endl;
+	BinaryHeap<unsigned int> bh(top);
+	cout << "# i R R*T(i) I(i)" << endl;
+	top--;
 
 	for(int iteration = 0; iteration < max_iterations; iteration++){
 		
+		bh.reset_swaps();
 		unsigned long int swaps = 0;
+		chrono::milliseconds aggregated_time(0);
+		unsigned int qt_numbers = pow(2, iteration + 1) - pow(2, iteration);
 		
-		chrono::milliseconds aggregated_time;
-		for(int repetition = 0; repetition < max_repetitions; repetition++){
-			unsigned int top = pow(2, iteration) - 1;
-			
-			BinaryHeap<unsigned int> bh(top);
-			chrono::system_clock::time_point t = chrono::system_clock::now();
-			
-			for (unsigned int i = top - 1; top > 0 && i > 0; --i){
-				bh.push( i , i );
-			}
+		chrono::system_clock::time_point t = chrono::system_clock::now();
 
-			if( top > 0 ){
-				bh.push( 0 , 0 );
-			} 
-
-			aggregated_time += chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now()-t);
-			swaps = bh.get_nro_swaps();
+		for(int repetition = 0; repetition < max_repetitions - 1; repetition++){
+			BinaryHeap<unsigned int> bh_save(bh);
+			auto top_save = top;
+			auto qt_numbers_save = qt_numbers;
+			swaps = execute( bh_save, top_save, qt_numbers_save);
 		}
+
+		swaps = execute(bh, top , qt_numbers);
+		aggregated_time = chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now()-t);
 		// medição
-		cout << iteration << " " << (aggregated_time.count() / max_repetitions)
-			 << " " << swaps << endl;
+		cout << iteration << " " << max_repetitions << " " << aggregated_time.count() << " " << swaps << endl;
 	}
 
 }	

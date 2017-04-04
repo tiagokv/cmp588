@@ -82,6 +82,10 @@ class BinaryHeap{
             this->nro_swaps = bh.nro_swaps;
         };
 
+        void reset_swaps(){
+            nro_swaps = 0;
+        }
+
         void push(unsigned int p, const T& value){
             if( p > keys.size() ) throw std::length_error("exceeded size");
 
