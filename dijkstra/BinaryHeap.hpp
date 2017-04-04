@@ -63,8 +63,23 @@ class BinaryHeap{
 
     public:
         BinaryHeap(unsigned int maxSize):nro_swaps(0){
+            keys.reserve(maxSize);
+            heap_inv.reserve(maxSize);
+            heap.reserve(maxSize);
+
             std::generate_n(std::back_inserter(keys), maxSize, [](){return nullptr;});
             std::generate_n(std::back_inserter(heap_inv), maxSize, [](){return -1;});
+        };
+
+        BinaryHeap(const BinaryHeap& bh){
+            this->keys.reserve( bh.keys.capacity() );
+            this->heap.reserve( bh.heap.capacity() );
+            this->heap_inv.reserve( bh.heap_inv.capacity() );
+
+            this->keys = bh.keys;
+            this->heap = bh.heap;
+            this->heap_inv = bh.heap_inv;
+            this->nro_swaps = bh.nro_swaps;
         };
 
         void push(unsigned int p, const T& value){
