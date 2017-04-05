@@ -17,8 +17,8 @@ int execute(BinaryHeap<unsigned int>& bh, unsigned int& top, unsigned int& qt_nu
 }
 
 int main(int argc, char** argv){
-	const int max_repetitions = 1;
-	const int max_iterations = 5;
+	const int max_repetitions = 5;
+	const int max_iterations = 20;
 	// format of output 
 	unsigned int top = pow(2, max_iterations);
 
@@ -39,7 +39,7 @@ int main(int argc, char** argv){
 			BinaryHeap<unsigned int> bh_save(bh);
 			auto top_save = top;
 			auto qt_numbers_save = qt_numbers;
-			swaps = execute( bh_save, top_save, qt_numbers_save);
+			swaps = execute( bh_save, top_save, qt_numbers_save); // doesn't it swap (2^i)*i?
 		}
 
 		swaps = execute(bh, top , qt_numbers);

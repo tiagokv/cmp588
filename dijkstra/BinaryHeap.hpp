@@ -12,7 +12,11 @@ class BinaryHeap{
         std::vector<std::shared_ptr<T>> keys;
         std::vector<unsigned int> heap;
         std::vector<unsigned int> heap_inv;
+
         unsigned long nro_swaps;
+        unsigned long nro_pushs;
+        unsigned long nro_updates;
+        unsigned long nro_pops;
             
         void shiftUp(int i){
             int k = i;
@@ -59,10 +63,11 @@ class BinaryHeap{
             std::iter_swap(begin(heap) + from, begin(heap) + to);
 
             nro_swaps++;
+
         };
 
     public:
-        BinaryHeap(unsigned int maxSize):nro_swaps(0){
+        BinaryHeap(unsigned int maxSize):nro_swaps(0),nro_pushs(0), nro_updates(0), nro_pops(0){
             keys.reserve(maxSize);
             heap_inv.reserve(maxSize);
             heap.reserve(maxSize);
@@ -80,6 +85,9 @@ class BinaryHeap{
             this->heap = bh.heap;
             this->heap_inv = bh.heap_inv;
             this->nro_swaps = bh.nro_swaps;
+            this->nro_pushs = bh.nro_pushs;
+            this->nro_updates = bh.nro_updates;
+            this->nro_pops = bh.nro_pops;
         };
 
         void reset_swaps(){
@@ -94,6 +102,8 @@ class BinaryHeap{
             heap_inv[p] = heap.size() - 1; 
             
             shiftUp(heap_inv[p]);
+
+            nro_pushs++;
         }
 
         void update(unsigned int p, const T& value){
@@ -104,6 +114,8 @@ class BinaryHeap{
                 keys[p] = std::make_shared<T>(value);
                 shiftUp(heap_inv[p]);
             }
+
+            nro_updates++;
         };
         
         T pop(){
@@ -118,6 +130,8 @@ class BinaryHeap{
             
             shiftDown(0);
 
+            nro_pops++;
+
             return ret;
         };
 
@@ -131,6 +145,18 @@ class BinaryHeap{
 
         unsigned long int get_nro_swaps() const{
             return nro_swaps;
+        }
+
+        unsigned long get_nro_pushes() const{
+            return nro_pushs;
+        }
+
+        unsigned long get_nro_update() const{
+            return nro_updates;
+        }
+
+        unsigned long get_nro_pops() const{
+            return nro_pops;
         }
 };
 
