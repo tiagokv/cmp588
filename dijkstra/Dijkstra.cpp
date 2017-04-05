@@ -7,14 +7,15 @@
 
 using namespace std;
 
-int shortest_path(const Graph& graph, unsigned int from, unsigned int to){
+int shortest_path(const Graph& graph, unsigned int from, unsigned int to,
+				  unsigned int& num_pops, unsigned int& num_pushes, unsigned int& num_updates){
 
 	BinaryHeap<shared_ptr<Vertex>> pq(graph.number_vertexes());
 	vector<shared_ptr<Vertex>> vertexes;
 	vector<bool> visited(graph.number_vertexes(), false);
 
 	//Initialization - All vertexes have infinity distance, except the source
-	for(int i = 0; i < graph.number_vertexes(); i++){
+	for(unsigned int i = 0; i < graph.number_vertexes(); i++){
 		shared_ptr<Vertex> v = make_shared<Vertex>(i, i == from ? 0 : numeric_limits<unsigned int>::max(), -1);
 		vertexes.push_back(v);
 	}
@@ -39,6 +40,10 @@ int shortest_path(const Graph& graph, unsigned int from, unsigned int to){
 		}
 		visited[v->index] = true;
 	}
+
+	num_updates = bh.get_nro_update();
+	num_pushes = bh.get_nro_pushes();
+	num_pops = bh.get_nro_pops();
 
 	return vertexes[to]->distance_to;
 }

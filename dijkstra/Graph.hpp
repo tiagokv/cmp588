@@ -22,7 +22,7 @@ class Graph{
 		void resize(int newSize);
 		void connect(unsigned int from,unsigned int to,unsigned int weight);
 		std::vector<std::shared_ptr<Edge>> adjacents(int vertex) const;
-		int number_vertexes() const { return edges.size(); };
+		unsigned int number_vertexes() const { return edges.size(); };
 };
 
 #endif
