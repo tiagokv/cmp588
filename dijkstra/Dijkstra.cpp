@@ -3,14 +3,14 @@
 #include <memory>
 
 #include "Dijkstra.hpp"
-#include "BinaryHeap.hpp"
+#include "NAryHeap.hpp"
 
 using namespace std;
 
 int shortest_path(const Graph& graph, unsigned int from, unsigned int to,
 				  unsigned int& num_pops, unsigned int& num_pushes, unsigned int& num_updates){
 
-	BinaryHeap<shared_ptr<Vertex>> pq(graph.number_vertexes());
+	NAryHeap<shared_ptr<Vertex>> pq(2, graph.number_vertexes());
 	vector<shared_ptr<Vertex>> vertexes;
 	vector<bool> visited(graph.number_vertexes(), false);
 

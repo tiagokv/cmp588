@@ -1,13 +1,14 @@
-#ifndef BINARYHEAP_HPP
-#define BINARYHEAP_HPP
+#ifndef NARYHEAP_HPP
+#define NARYHEAP_HPP
 
 #include <vector>
 #include <algorithm>
 #include <memory>
 #include <exception>
+#include <cassert>
 
 template<class T>
-class BinaryHeap{
+class NAryHeap{
 	private:
         std::vector<std::shared_ptr<T>> keys;
         std::vector<unsigned int> heap;
@@ -17,6 +18,7 @@ class BinaryHeap{
         unsigned long nro_pushs;
         unsigned long nro_updates;
         unsigned long nro_pops;
+        unsigned int heap_size;
             
         void shiftUp(int i){
             int k = i;
@@ -32,28 +34,39 @@ class BinaryHeap{
         void shiftDown(int i){
             int k = i;
             while( numChildren(k) > 0 ){
-                if( numChildren(k) == 1 && getKey(left(k)) < getKey(k) ){
-                    swap( left(k) , k );
-                    k = left(k);
-                }else if( numChildren(k) == 2 && (getKey(left(k)) < getKey(k) || getKey(right(k)) < getKey(k)) ){
-                    if( getKey(left(k)) < getKey(right(k)) ){
-                        swap( left(k) , k );
-                        k = left(k);
+                if( numChildren(k) == 1 ){
+                    if( getKey(getChild(k,1)) < getKey(k) ){
+                        swap( getChild(k,1) , k );
+                        k = getChild(k,1);
                     }else{
-                        swap( right(k) , k );
-                        k = right(k);
+                        break;
                     }
-                }else{
-                    break; //only one children and order is maintained
+                }else if( numChildren(k) >= 2 ){
+                    unsigned int min_child = getChild(k,1);
+                    for(int child = 2; child <= numChildren(k); child++){
+                        if( getKey(min_child) > getKey(getChild(k, child)))
+                            min_child = getChild(k, child);
+                    }
+
+                    if( getKey(min_child) < getKey(k) ){
+                        swap( min_child , k );
+                        k = min_child;
+                    }else{
+                        break;
+                    }
                 }
             }
         }
 
         bool isRoot(unsigned int i){ return i == 0; };
-        int parent(unsigned int i){ return (i-1)/2; };
-        int right(unsigned int i){ return 2*i + 2; };
-        int left(unsigned int i){ return 2*i + 1; };
-        int numChildren(unsigned int i){ return std::max(std::min(static_cast<int>(heap.size() - left(i)), 2 ) , 0 ); };
+        int parent(unsigned int i){ return (i-1)/heap_size; };
+        int getChild(unsigned int i, unsigned int p){
+            assert(p > 0 && p <= heap_size);
+            return heap_size*i + p;
+        };
+
+        int numChildren(unsigned int i){ return std::max(std::min(static_cast<int>(heap.size() - getChild(i,1)), static_cast<int>(heap_size) ) , 
+                                                         0 ); };
 
         void swap(unsigned int from, unsigned int to){
             if( from == to ) return;
@@ -63,11 +76,10 @@ class BinaryHeap{
             std::iter_swap(begin(heap) + from, begin(heap) + to);
 
             nro_swaps++;
-
         };
 
     public:
-        BinaryHeap(unsigned int maxSize):nro_swaps(0),nro_pushs(0), nro_updates(0), nro_pops(0){
+        NAryHeap(unsigned int heapSize, unsigned int maxSize):nro_swaps(0),nro_pushs(0), nro_updates(0), nro_pops(0), heap_size(heapSize){
             keys.reserve(maxSize);
             heap_inv.reserve(maxSize);
             heap.reserve(maxSize);
@@ -76,7 +88,16 @@ class BinaryHeap{
             std::generate_n(std::back_inserter(heap_inv), maxSize, [](){return -1;});
         };
 
-        BinaryHeap(const BinaryHeap& bh){
+        NAryHeap(unsigned int maxSize):nro_swaps(0),nro_pushs(0), nro_updates(0), nro_pops(0), heap_size(2){
+            keys.reserve(maxSize);
+            heap_inv.reserve(maxSize);
+            heap.reserve(maxSize);
+
+            std::generate_n(std::back_inserter(keys), maxSize, [](){return nullptr;});
+            std::generate_n(std::back_inserter(heap_inv), maxSize, [](){return -1;});
+        };
+
+        NAryHeap(const NAryHeap& bh){
             this->keys.reserve( bh.keys.capacity() );
             this->heap.reserve( bh.heap.capacity() );
             this->heap_inv.reserve( bh.heap_inv.capacity() );
@@ -88,6 +109,7 @@ class BinaryHeap{
             this->nro_pushs = bh.nro_pushs;
             this->nro_updates = bh.nro_updates;
             this->nro_pops = bh.nro_pops;
+            this->heap_size = bh.heap_size;
         };
 
         void reset_swaps(){
