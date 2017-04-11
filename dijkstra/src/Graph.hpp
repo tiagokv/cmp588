@@ -21,8 +21,9 @@ class Graph{
 	public:
 		void resize(int newSize);
 		void connect(unsigned int from,unsigned int to,unsigned int weight);
-		std::vector<std::shared_ptr<Edge>> adjacents(int vertex) const;
+		std::vector<std::shared_ptr<Edge>> adjacents(unsigned int vertex) const;
 		unsigned int number_vertexes() const { return edges.size(); };
+		bool are_connected(unsigned int a, unsigned int b) const;
 };
 
 #endif

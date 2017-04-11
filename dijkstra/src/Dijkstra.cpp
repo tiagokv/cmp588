@@ -4,8 +4,13 @@
 
 #include "Dijkstra.hpp"
 #include "NAryHeap.hpp"
+/*#include "BinaryHeap.hpp"*/
 
 using namespace std;
+
+bool operator<(const std::shared_ptr<Vertex>& lhs, const std::shared_ptr<Vertex>& rhs){
+	return lhs->distance_to < rhs->distance_to;
+}
 
 int shortest_path(const Graph& graph, unsigned int from, unsigned int to,
 				  unsigned int& num_pops, unsigned int& num_pushes, unsigned int& num_updates){
@@ -30,20 +35,23 @@ int shortest_path(const Graph& graph, unsigned int from, unsigned int to,
 			if( !visited[edge->to] ){
 				if( vertexes[edge->to]->distance_to == numeric_limits<unsigned int>::max() ){
 					vertexes[edge->to]->distance_to = v->distance_to + edge->weight;
+					vertexes[edge->to]->came_from = v->index;
 					pq.push( edge->to , vertexes[edge->to] );
 				}
 				else if( v->distance_to + edge->weight < vertexes[edge->to]->distance_to ){
 					vertexes[edge->to]->distance_to = v->distance_to + edge->weight;
+					vertexes[edge->to]->came_from = v->index;
 					pq.update( edge->to , vertexes[edge->to] );
 				}
 			}
 		}
+
 		visited[v->index] = true;
 	}
 
-	num_updates = bh.get_nro_update();
-	num_pushes = bh.get_nro_pushes();
-	num_pops = bh.get_nro_pops();
+	num_updates = pq.get_nro_update();
+	num_pushes = pq.get_nro_pushes();
+	num_pops = pq.get_nro_pops();
 
 	return vertexes[to]->distance_to;
 }

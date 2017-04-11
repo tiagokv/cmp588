@@ -18,7 +18,7 @@ int execute(BinaryHeap<unsigned int>& bh, unsigned int& top, unsigned int& qt_nu
 
 int main(int argc, char** argv){
 	const int max_repetitions = 5;
-	const int max_iterations = 20;
+	const int max_iterations = 21;
 	// format of output 
 	unsigned int top = pow(2, max_iterations);
 

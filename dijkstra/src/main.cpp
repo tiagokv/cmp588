@@ -47,6 +47,8 @@ int main(int argv, char** argc){
 
 	cout << "Graph loaded successfully - with " << num_vertexes << " vertexes and " << num_edges << " edges" << endl; 
 
-	cout << shortest_path(g, from, to) << endl;
+	unsigned int num_pops = 0, num_pushes = 0, num_updates = 0;
+
+	cout << "Shortest Path from " << from << " to " << to << " costs " << shortest_path(g, from, to, num_pops, num_pushes, num_updates) << endl;
 	return 0;
 }

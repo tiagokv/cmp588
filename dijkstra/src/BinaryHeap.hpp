@@ -20,7 +20,7 @@ class BinaryHeap{
             
         void shiftUp(int i){
             int k = i;
-            while( k > 0 && getKey(parent(k)) > getKey(k)){
+            while( k > 0 && getKey(k) < getKey(parent(k))){
                 swap( parent(k) , k);
                 k = parent(k);
             }
