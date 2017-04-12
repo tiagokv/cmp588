@@ -2,6 +2,7 @@
 #include <string>
 #include <sstream>
 #include <cstdlib>
+#include <chrono>
 
 #include "Graph.hpp"
 #include "Dijkstra.hpp"
@@ -49,6 +50,11 @@ int main(int argv, char** argc){
 
 	unsigned int num_pops = 0, num_pushes = 0, num_updates = 0;
 
-	cout << "Shortest Path from " << from << " to " << to << " costs " << shortest_path(g, from, to, num_pops, num_pushes, num_updates) << endl;
+	chrono::system_clock::time_point t = chrono::system_clock::now();
+
+	int sp = shortest_path(g, from, to, num_pops, num_pushes, num_updates, true);
+
+	cout << "Shortest Path from " << from << " to " << to << " costs " << sp << endl;
+	cout << "Took " << chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now()-t).count() << " ms to execute" << endl;
 	return 0;
 }

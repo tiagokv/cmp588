@@ -13,7 +13,7 @@ bool operator<(const std::shared_ptr<Vertex>& lhs, const std::shared_ptr<Vertex>
 }
 
 int shortest_path(const Graph& graph, unsigned int from, unsigned int to,
-				  unsigned int& num_pops, unsigned int& num_pushes, unsigned int& num_updates){
+				  unsigned int& num_pops, unsigned int& num_pushes, unsigned int& num_updates, bool stopAtFinal){
 
 	NAryHeap<shared_ptr<Vertex>> pq(2, graph.number_vertexes());
 	vector<shared_ptr<Vertex>> vertexes;
@@ -30,6 +30,9 @@ int shortest_path(const Graph& graph, unsigned int from, unsigned int to,
 	//For each vertex with the minimum distance to, relax
 	while(!pq.empty()){
 		shared_ptr<Vertex> v = pq.pop();
+
+		if( stopAtFinal && v->index == to )
+			return vertexes[to]->distance_to; 
 
 		for(auto& edge: graph.adjacents(v->index)){
 			if( !visited[edge->to] ){

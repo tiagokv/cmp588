@@ -22,7 +22,7 @@ public:
 };
 
 int shortest_path(const Graph& graph, unsigned int from, unsigned int to, 
-				  unsigned int& num_pops, unsigned int& num_pushes, unsigned int& num_updates);
+				  unsigned int& num_pops, unsigned int& num_pushes, unsigned int& num_updates, bool stopAtFinal = false);
 
 
 #endif
