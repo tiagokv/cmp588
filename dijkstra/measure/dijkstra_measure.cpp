@@ -1,10 +1,13 @@
 #include <chrono>
 #include <cmath>
 #include <random>
+#include <iostream>
 
 #include "Dijkstra.hpp"
 
 using namespace std;
+
+const int REP = 1;
 
 random_device rd;		
 mt19937 mt(rd());
@@ -15,75 +18,38 @@ struct vert_random{
 };
 
 void build_graph(bool vary_edge, Graph& graph, int max_vertexes, int quantity_edges){
-	graph.resize(max_vertexes);
-	uniform_int_distribution<unsigned int> rand_vertex(0, max_vertexes-1);
+
+
+	srand48(time(0));
+	chrono::milliseconds total(0);
+
+	chrono::system_clock::time_point t = chrono::system_clock::now();
+
+	graph.reserve(max_vertexes);
+
+	double probability = min( static_cast<double>(quantity_edges) / pow(max_vertexes,2), 1.0 );
+	bernoulli_distribution rand_vertex(probability);
 	uniform_int_distribution<unsigned int> rand_weight(0, 1000);
 
-	// if( vary_edge ){
-		std::vector<vert_random> v;
+	for(size_t from = 0; from < max_vertexes; from++){
+		for(size_t to = 0; to < max_vertexes; to++){
+			/*if( from != to && rand_vertex(mt) ){
+				graph.connect(from, to, rand_weight(mt));
+			}*/
 
-		//Yes, this is not good for memory, but is temporary to build the graph
-		for (unsigned int i = 0; i < max_vertexes; ++i)
-		{
-			vert_random vert;
-			vert.index = i;
-			//vert.vertexes.resize(max_vertexes);
-			for (unsigned int j = 0; j < max_vertexes; ++j)
-			{
-				if( i != j ){
-					vert.vertexes.push_back(j);
-				}
-			}
-			v.push_back(vert);
-		}
-
-		//connect all vertexes
-		while(!v.empty() && quantity_edges > 0){
-			uniform_int_distribution<size_t> rand_vertex(0, v.size()-1);
-			size_t from_index = rand_vertex(mt);
-
-			uniform_int_distribution<size_t> rand_vertex_to(0, v[from_index].vertexes.size()-1);
-			
-			size_t to_index = rand_vertex_to(mt);
-
-			graph.connect(v[from_index].index, v[from_index].vertexes[to_index], rand_weight(mt));
-			quantity_edges--;
-
-			v[from_index].vertexes.erase(begin(v[from_index].vertexes) + to_index);
-			if( v[from_index].vertexes.empty() ){
-				v.erase(begin(v) + from_index);
+			if( from != to && drand48() < probability ){
+				graph.connect(from, to, rand_weight(mt));
 			}
 		}
+	}
 
-		// sanity check
-		//cout << "terminou com " << quantity_edges << " e com " << v.size() << " sobrando" << endl;
-	/*}else{
-		int connected = 0;
-		while(quantity_edges-- && connected <= pow(max_vertexes,2) ){
-			unsigned int from = rand_vertex(mt);
-			unsigned int to = rand_vertex(mt);
-
-			int tentatives = 0;
-			while(from == to || graph.are_connected(from,to)){
-				if( tentatives > 100 ){
-					auto adj = graph.adjacents(from);
-					for (int i = 0; i < max_vertexes; ++i)
-					{
-						
-					}
-				}
-				to = rand_vertex(mt);
-				tentatives++;
-			}
-			graph.connect(from, to, rand_weight(mt));
-			connected++;
-		}
-	}*/
+	total += chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now()-t);
+	cerr << "Took " << total.count() << "ms to instantiate the graph" << endl;
 }
 
 void measure_dijkstra(bool vary_edges, int max_objs, int max_repetition, int min_var_obj, int max_var_obj){
 
-    cout << "i I(i) D(i) U(i) T(i)" << endl;
+    cout << "i ii V E I(i) D(i) U(i) R R*T(i)" << endl;
 
 	for(int i = min_var_obj; i < max_var_obj; i++){
 
@@ -96,31 +62,28 @@ void measure_dijkstra(bool vary_edges, int max_objs, int max_repetition, int min
 			build_graph(vary_edges, g, pow(2, i), max_objs);
 		}
 
-		uniform_int_distribution<unsigned int> rand_vertex(0, g.number_vertexes()-1);
+		uniform_int_distribution<size_t> rand_vertex(0, g.number_vertexes()-1);
 
-		unsigned int stop_vertex = rand_vertex(mt);
-
-		unsigned int num_pops_max = 0, num_pushes_max = 0, num_updates_max = 0;
-		chrono::milliseconds total(0);
+		size_t stop_vertex = rand_vertex(mt);
 
 		while(repetition--){
-			unsigned int initial_vertex = stop_vertex;
+			auto initial_vertex = stop_vertex;
 			while( stop_vertex == initial_vertex ) initial_vertex = rand_vertex(mt);
 
 			unsigned int num_pops = 0, num_pushes = 0, num_updates = 0;
 
+			chrono::milliseconds total(0);
 			chrono::system_clock::time_point t = chrono::system_clock::now();
 
-			shortest_path(g, initial_vertex, stop_vertex, num_pops, num_pushes , num_updates );
+			for(int i = 0; i < REP; i++){
+				shortest_path(g, initial_vertex, stop_vertex, num_pops, num_pushes , num_updates );
+				total += chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now()-t);
+			}
 
-			num_pushes_max = max(num_pushes_max, num_pushes);
-			num_pops_max = max(num_pops_max, num_pops);
-			num_updates_max = max(num_updates_max, num_updates);
-
-			total += chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now()-t);
+			cout << i << " " << (max_repetition - repetition) << " " << g.number_vertexes() << " " << g.number_edges() << " " 
+				 << num_pushes << " " << num_pops << " " << num_updates << " " 
+				 << REP << " " << total.count() << endl;
 		}
-		cout << i << " " << max_repetition << " " << num_pushes_max << " " << num_pops_max << " " << num_updates_max << " " 
-				  << " " << total.count() << endl;
 	}
 	
 }

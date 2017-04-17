@@ -4,7 +4,7 @@
 
 #include "Dijkstra.hpp"
 #include "NAryHeap.hpp"
-/*#include "BinaryHeap.hpp"*/
+#include "BinaryHeap.hpp"
 
 using namespace std;
 
@@ -12,16 +12,19 @@ bool operator<(const std::shared_ptr<Vertex>& lhs, const std::shared_ptr<Vertex>
 	return lhs->distance_to < rhs->distance_to;
 }
 
-int shortest_path(const Graph& graph, unsigned int from, unsigned int to,
+int shortest_path(const Graph& graph, size_t from, size_t to,
 				  unsigned int& num_pops, unsigned int& num_pushes, unsigned int& num_updates, bool stopAtFinal){
 
 	NAryHeap<shared_ptr<Vertex>> pq(2, graph.number_vertexes());
+	//BinaryHeap<shared_ptr<Vertex>> pq(graph.number_vertexes());
 	vector<shared_ptr<Vertex>> vertexes;
+	vertexes.reserve(graph.number_vertexes());
+	
 	vector<bool> visited(graph.number_vertexes(), false);
 
 	//Initialization - All vertexes have infinity distance, except the source
-	for(unsigned int i = 0; i < graph.number_vertexes(); i++){
-		shared_ptr<Vertex> v = make_shared<Vertex>(i, i == from ? 0 : numeric_limits<unsigned int>::max(), -1);
+	for(size_t i = 0; i < graph.number_vertexes(); i++){
+		auto v = make_shared<Vertex>(i, i == from ? 0 : numeric_limits<unsigned int>::max(), -1);
 		vertexes.push_back(v);
 	}
 
@@ -29,12 +32,12 @@ int shortest_path(const Graph& graph, unsigned int from, unsigned int to,
 
 	//For each vertex with the minimum distance to, relax
 	while(!pq.empty()){
-		shared_ptr<Vertex> v = pq.pop();
+		auto v = pq.pop();
 
 		if( stopAtFinal && v->index == to )
 			return vertexes[to]->distance_to; 
 
-		for(auto& edge: graph.adjacents(v->index)){
+		for(const auto& edge: graph.adjacents(v->index)){
 			if( !visited[edge->to] ){
 				if( vertexes[edge->to]->distance_to == numeric_limits<unsigned int>::max() ){
 					vertexes[edge->to]->distance_to = v->distance_to + edge->weight;
