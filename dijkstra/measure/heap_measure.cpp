@@ -20,11 +20,11 @@ int execute_push(NAryHeap<unsigned int>& bh, unsigned int& top, size_t& qt_numbe
 	return bh.get_nro_swaps();
 }
 
-void measure_push(){
+void measure_push(ofstream& output){
 	const int max_repetitions = 5;
-	const int max_iterations = 30;
+	const int max_iterations = 21;
 	// format of output
-	cout << "i R R*T(i) I(i)" << endl;
+	output << "i R R*T(i) I(i)" << endl;
 
 	unsigned int top = pow(2, max_iterations);
 
@@ -51,19 +51,18 @@ void measure_push(){
 		swaps = execute_push(bh, top , qt_numbers);
 		aggregated_time = chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now()-t);
 		// medição
-		cout << iteration << " " << max_repetitions << " " << aggregated_time.count() << " " << swaps << endl;
+		output << iteration << " " << max_repetitions << " " << aggregated_time.count() << " " << swaps << endl;
 	}
 }
 
-void measure_update(){
+void measure_update(ofstream& output){
 	const int max_repetitions = 1;
 	const int max_iterations = 21;
 	// format of output
-	cout << "i R R*T(i) S(i)" << endl;
+	output << "i R R*T(i) S(i)" << endl;
 
 	for(int iteration = 1; iteration < max_iterations; iteration++){
 		NAryHeap<unsigned int> bh(2, 2*pow(2, iteration)-1);
-		unsigned long swaps = 0;
 		chrono::milliseconds aggregated_time(0);
 		
 		int i = 0;
@@ -89,18 +88,18 @@ void measure_update(){
 		}
 		aggregated_time = chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now()-t);
 		// medição
-		cout << iteration << " " << max_repetitions << " " << aggregated_time.count() << " " << bh.get_nro_swaps() << endl;
+		output << iteration << " " << max_repetitions << " " << aggregated_time.count() << " " << bh.get_nro_swaps() << endl;
 		//bh.print_heap();
 	}
 }
 
-void measure_delete(){
+void measure_delete(ofstream& output){
 	random_device rd;		
 	mt19937 mt(rd());
 
-	cout << "i T(i) D(i)" << endl;
+	output << "i T(i) D(i)" << endl;
 
-	const int max_iterations = 31;
+	const int max_iterations = 21;
 
 	for(int i = 1; i < max_iterations; i++){
 		uniform_int_distribution<size_t> pick(0,pow(2,i)-1);
@@ -116,7 +115,7 @@ void measure_delete(){
 		chrono::system_clock::time_point t = chrono::system_clock::now();
 		while(remove--) bh.pop();
 		aggregated_time = chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now()-t);
-		cout << i << " " << aggregated_time.count() << " " << bh.get_nro_swaps() << endl;
+		output << i << " " << aggregated_time.count() << " " << bh.get_nro_swaps() << endl;
 	}
 }
 
@@ -125,23 +124,22 @@ int main(int argc, char** argv){
 	string prefix;
 	if(argc > 1) prefix.append(argv[1]);
 
-	ofstream push_file(prefix + "push");
-	ofstream update_file(prefix + "update");
-	ofstream delete_file(prefix + "delete");
+	ofstream push_file;
+	ofstream update_file;
+	ofstream delete_file;
 
-	switch(argv[1][0]){
-		case 'p':
-			measure_push();
-			break;
-		case 'u':
-			measure_update();
-			break;
-		case 'd':
-			measure_delete();
-			break;				
-		default:
-			break;
-	}
+	push_file.open(prefix + "push");
+	update_file.open(prefix + "update");
+	delete_file.open(prefix + "delete");
+
+	cout << "Measuring push..." << endl;
+	measure_push(push_file);
+
+	cout << "Measuring update..." << endl;
+	measure_update(update_file);
+
+	cout << "Measuring deletemin..." << endl;
+	measure_delete(delete_file);
 
 	push_file.close();
 	update_file.close();
