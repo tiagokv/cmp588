@@ -6,6 +6,7 @@
 #include <memory>
 #include <exception>
 #include <cassert>
+#include <iostream>
 
 template<class T>
 class NAryHeap{
@@ -19,19 +20,22 @@ class NAryHeap{
         unsigned long nro_updates;
         unsigned long nro_pops;
         int heap_size;
-            
-        void shiftUp(size_t i){
+
+        void shiftUp(const size_t& i){
             auto k = i;
-            while( k > 0 && getKey(parent(k)) > getKey(k)){
+            std::cerr << "shiftUp1" << std::endl;
+            while( k > 0 && getKey(k) < getKey(parent(k))){
+                std::cerr << "shiftUp2" << std::endl;
                 swap( parent(k) , k);
                 k = parent(k);
             }
         };
 
-        T getKey(size_t i){
+        T getKey(const size_t& i){
             return *keys[heap[i]];
         };
-        void shiftDown(size_t i){
+
+        void shiftDown(const size_t& i){
             auto k = i;
             while( numChildren(k) > 0 ){
                 if( numChildren(k) == 1 ){
@@ -44,7 +48,7 @@ class NAryHeap{
                 }else if( numChildren(k) >= 2 ){
                     auto min_child = getChild(k,1);
                     for(int child = 2; child <= numChildren(k); child++){
-                        if( getKey(min_child) > getKey(getChild(k, child)))
+                        if( getKey(getChild(k, child)) < getKey(min_child))
                             min_child = getChild(k, child);
                     }
 
@@ -56,45 +60,43 @@ class NAryHeap{
                     }
                 }
             }
-        }
+        };
 
-        bool isRoot(size_t i){ return i == 0; };
-        size_t parent(size_t i){ return (i-1)/heap_size; };
-        size_t getChild(size_t i, size_t p){
-            assert(p > 0 && p <= heap_size);
+        bool isRoot(const size_t& i){ return i == 0; };
+        size_t parent(const size_t& i){ return (i-1)/heap_size; };
+        size_t getChild(const size_t& i,const size_t& p){
+            //assert(p > 0 && p <= heap_size);
             return heap_size*i + p;
         };
 
-        size_t numChildren(size_t i){ return static_cast<size_t>(std::max(std::min(static_cast<int>(heap.size() - getChild(i,1)), static_cast<int>(heap_size) ) , 
-                                                         0 )); };
+        int numChildren(const size_t& i){ 
+            return std::max(std::min(static_cast<int>(heap.size() - getChild(i,1)), heap_size ), 0); 
+        };
 
-        void swap(size_t from, size_t to){
+        void swap(const size_t& from, const size_t& to){
             if( from == to ) return;
 
             heap_inv[heap[from]] = to;
             heap_inv[heap[to]] = from;
-            std::iter_swap(begin(heap) + from, begin(heap) + to);
+
+            auto aux = heap[to];
+            heap[to] = heap[from];
+            heap[from] = aux;
 
             nro_swaps++;
         };
 
     public:
         NAryHeap(size_t heapSize, size_t maxSize):nro_swaps(0),nro_pushs(0), nro_updates(0), nro_pops(0), heap_size(heapSize){
-            keys.reserve(maxSize);
-            heap_inv.reserve(maxSize);
+            keys.resize(maxSize, nullptr);
+            heap_inv.resize(maxSize, -1);
             heap.reserve(maxSize);
-
-            std::generate_n(std::back_inserter(keys), maxSize, [](){return nullptr;});
-            std::generate_n(std::back_inserter(heap_inv), maxSize, [](){return -1;});
         };
 
         NAryHeap(size_t maxSize):nro_swaps(0),nro_pushs(0), nro_updates(0), nro_pops(0), heap_size(2){
-            keys.reserve(maxSize);
-            heap_inv.reserve(maxSize);
+            keys.resize(maxSize, nullptr);
+            heap_inv.resize(maxSize, -1);
             heap.reserve(maxSize);
-
-            std::generate_n(std::back_inserter(keys), maxSize, [](){return nullptr;});
-            std::generate_n(std::back_inserter(heap_inv), maxSize, [](){return -1;});
         };
 
         NAryHeap(const NAryHeap& bh){
@@ -114,9 +116,9 @@ class NAryHeap{
 
         void reset_swaps(){
             nro_swaps = 0;
-        }
+        };
 
-        void push(size_t p, const T& value){
+        void push(const size_t& p, T value){
             if( p > keys.size() ) throw std::length_error("exceeded size");
 
             keys[p] = std::make_shared<T>(value);
@@ -126,15 +128,16 @@ class NAryHeap{
             shiftUp(heap_inv[p]);
 
             nro_pushs++;
-        }
+        };
 
-        void update(size_t p, const T& value){
-            if( *keys[p] < value ){
-                keys[p] = std::make_shared<T>(value);
-                shiftDown(heap_inv[p]);
+        void update(const size_t& p, T value){
+            auto k = std::make_shared<T>(value);
+            if(*k < *keys[p]){
+                keys[p] = k;
+                shiftUp(heap_inv[p]);                
             }else{
-                keys[p] = std::make_shared<T>(value);
-                shiftUp(heap_inv[p]);
+                keys[p] = k;
+                shiftDown(heap_inv[p]);
             }
 
             nro_updates++;
@@ -145,7 +148,7 @@ class NAryHeap{
             
             auto ret = getKey(0);
             swap( 0, heap.size() - 1);
-            nro_swaps--; // compensate the swap ++
+            if(nro_swaps > 0) nro_swaps--; // compensate the swap ++
 
             heap_inv[heap.back()] = -1;
             keys[heap.back()] = nullptr;
@@ -172,23 +175,23 @@ class NAryHeap{
                 std::cout << *keys[index] << " ";
             }
             std::cout << std::endl;
-        }
+        };
 
         unsigned long get_nro_swaps() const{
             return nro_swaps;
-        }
+        };
 
         unsigned long get_nro_pushes() const{
             return nro_pushs;
-        }
+        };
 
         unsigned long get_nro_update() const{
             return nro_updates;
-        }
+        };
 
         unsigned long get_nro_pops() const{
             return nro_pops;
-        }
+        };
 };
 
 #endif

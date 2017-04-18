@@ -1,6 +1,7 @@
 #ifndef DIJKSTRA_HPP_
 #define DIJKSTRA_HPP_
 #include <memory>
+#include <iostream>
 
 #include "Graph.hpp"
 
@@ -14,7 +15,7 @@ public:
 	Vertex(size_t index, unsigned int distance_to, size_t came_from ):index(index), 
 																	  distance_to(distance_to), 
 																	  came_from(came_from){};
-	virtual bool operator<(const Vertex& rhs){
+	bool operator<(const Vertex& rhs) const{
 		return this->distance_to < rhs.distance_to;
 	}
 };

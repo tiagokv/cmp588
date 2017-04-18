@@ -18,7 +18,7 @@ void read_dimacs(std::istream& in, unsigned& n, unsigned& m, Graph& a) {
 	stringstream linestr;
 	linestr.str(line);
 	linestr >> dummy >> dummy >> n >> m;
-	a.resize(n);
+	a.reserve(n);
 	unsigned i=0;
 	while (i<m) {
 		getline(in,line);
@@ -27,7 +27,7 @@ void read_dimacs(std::istream& in, unsigned& n, unsigned& m, Graph& a) {
 			unsigned u,v,w;
 			char ac;
 			arc >> ac >> u >> v >> w;
-      		a.connect(u,v,w);
+      		a.connect(static_cast<size_t>(u-1),static_cast<size_t>(v-1),w);
 			i++;
 		}
 	}
@@ -44,7 +44,7 @@ int main(int argv, char** argc){
 	unsigned int num_vertexes, num_edges;
 	Graph g;
 
-	read_dimacs( cin , num_vertexes, num_edges, g);
+	read_dimacs(cin , num_vertexes, num_edges, g);
 
 	cout << "Graph loaded successfully - with " << num_vertexes << " vertexes and " << num_edges << " edges" << endl; 
 
