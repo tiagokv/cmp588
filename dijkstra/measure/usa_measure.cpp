@@ -10,16 +10,17 @@
 
 using namespace std;
 
-void read_dimacs(std::istream& in, unsigned& n, unsigned& m, Graph& a) {
+void read_dimacs(std::istream& in, Graph& a) {
 	string line="", dummy;
 	while (line.substr(0,4) != "p sp")
 		getline(in,line);
 	
   // (1) get nodes and edges
 	stringstream linestr;
+	unsigned n, m;
 	linestr.str(line);
 	linestr >> dummy >> dummy >> n >> m;
-	a.resize(n);
+	a.reserve(n);
 	unsigned i=0;
 	while (i<m) {
 		getline(in,line);
@@ -36,28 +37,25 @@ void read_dimacs(std::istream& in, unsigned& n, unsigned& m, Graph& a) {
 
 int main(int argv, char** argc){
 
-	unsigned int num_vertexes, num_edges;
 	Graph g;
 
-	read_dimacs( cin , num_vertexes, num_edges, g);
+	read_dimacs( cin , g);
 
-	cout << "Graph loaded successfully - with " << num_vertexes << " vertexes and " << num_edges << " edges" << endl; 
-
-	unsigned int num_pops = 0, num_pushes = 0, num_updates = 0;
+	cout << "Graph loaded successfully - with " << g.number_vertices() << " vertices and " << g.number_edges() << " edges" << endl; 
 
 	chrono::milliseconds total(0);
 	int rep = 10;
 
 	random_device rd;		
 	mt19937 mt(rd());
-	uniform_int_distribution<unsigned int> rand_vertex(0, g.number_vertexes()-1);
+	uniform_int_distribution<unsigned int> rand_vertex(0, g.number_vertices() - 1);
 
 	while(rep--){
 		unsigned int from = rand_vertex(mt);
-		unsigned int to = rand_vertex(mt);
+
 		chrono::system_clock::time_point t = chrono::system_clock::now();
 
-		shortest_path(g, from, to, num_pops, num_pushes, num_updates, false);
+		Dijkstra dijks(g, from);
 
 		total += chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now()-t);
 	}

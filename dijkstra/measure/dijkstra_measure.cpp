@@ -58,25 +58,27 @@ void measure_dijkstra(bool vary_edges, size_t max_objs, int max_repetition, int 
 			build_graph(vary_edges, g, static_cast<size_t>(pow(2, i)), max_objs);
 		}
 
-		uniform_int_distribution<size_t> rand_vertex(0, g.number_vertexes()-1);
-
-		size_t stop_vertex = rand_vertex(mt);
+		uniform_int_distribution<size_t> rand_vertex(0, g.number_vertices()-1);
 
 		while(repetition--){
-			auto initial_vertex = stop_vertex;
-			while( stop_vertex == initial_vertex ) initial_vertex = rand_vertex(mt);
+			auto from = rand_vertex(mt);
 
 			unsigned int num_pops = 0, num_pushes = 0, num_updates = 0;
 
 			chrono::milliseconds total(0);
-			chrono::system_clock::time_point t = chrono::system_clock::now();
 
 			for(int i = 0; i < REP; i++){
-				shortest_path(g, initial_vertex, stop_vertex, num_pops, num_pushes , num_updates );
+				chrono::system_clock::time_point t = chrono::system_clock::now();
+
+				Dijkstra dijks(g, from);
+				num_pops = dijks.get_pops();
+				num_updates = dijks.get_updates();
+				num_pushes = dijks.get_pushes();
+
 				total += chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now()-t);
 			}
 
-			cout << i << " " << (max_repetition - repetition) << " " << g.number_vertexes() << " " << g.number_edges() << " " 
+			cout << i << " " << (max_repetition - repetition) << " " << g.number_vertices() << " " << g.number_edges() << " " 
 				 << num_pushes << " " << num_pops << " " << num_updates << " " 
 				 << REP << " " << total.count() << endl;
 		}
