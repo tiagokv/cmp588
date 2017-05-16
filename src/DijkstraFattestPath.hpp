@@ -1,3 +1,6 @@
+#ifndef DIJKSTRA_FATTEST_PATH_HPP
+#define DIJKSTRA_FATTEST_PATH_HPP
+
 #include <memory>
 #include <iostream>
 
@@ -11,12 +14,23 @@ class DijkstraFattestPath
 
 	const ResidualGraph& graph;
 	size_t source;
-	std::vector<double> min_to;
+	size_t to;
+	bool stop_to;
+
+	std::vector<size_t> min_to;
 	std::vector<std::shared_ptr<FlowEdge>> came_from;
 
 	void run();
 public:
-	DijkstraFattestPath(const ResidualGraph& graph, size_t source): graph(graph), source(source){
+
+	DijkstraFattestPath(const ResidualGraph& graph, size_t source): graph(graph), source(source), stop_to(false){
+		run();
+	};
+
+	DijkstraFattestPath(const ResidualGraph& graph, size_t source, size_t to): graph(graph), 
+																			   source(source), 
+																			   to(to), 
+																			   stop_to(false){
 		run();
 	};
 	
@@ -32,8 +46,19 @@ public:
 		return num_updates;
 	};
 
+	std::vector<std::shared_ptr<FlowEdge>> get_fattest_path(){
+		return get_fattest_path(this->to);
+	};
+
 	std::vector<std::shared_ptr<FlowEdge>> get_fattest_path(size_t to);
-	double get_fattest_capacity(size_t to){
+
+	size_t get_fattest_capacity(){
+		return get_fattest_capacity(this->to);
+	}
+
+	size_t get_fattest_capacity(size_t to){
 		return min_to[to];
 	};
 };
+
+#endif

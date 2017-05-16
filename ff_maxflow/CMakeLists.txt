@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.5)
-project (Dijkstra)
+project (FFMaxFlow)
 
 set(CMAKE_CXX_COMPILER /usr/bin/g++-5)
 enable_testing()
@@ -27,15 +27,19 @@ add_subdirectory(${CMAKE_BINARY_DIR}/googletest-src
 include_directories($ENV{BOOST_ROOT})
 include_directories(../src)
 
-set(SOURCES ../src/ResidualGraph.cpp ../src/DijkstraFattestPath.cpp)
+set(SOURCES ../src/ResidualGraph.cpp
+			../src/Graph.cpp 
+			../src/DijkstraFattestPath.cpp
+			../src/FordFulkersonFattestPath.cpp
+			../src/DimacsReader.cpp )
 
-# add_executable(dijkstra main_dijkstra.cpp ${SOURCES})
+add_executable(push_relabel_boost push_relabel_boost.cpp ${SOURCES})
 
-# set_target_properties(dijkstra PROPERTIES
-#     CXX_STANDARD 11
-#     CXX_STANDARD_REQUIRED YES
-#     CXX_EXTENSIONS NO
-# )
+set_target_properties(push_relabel_boost PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS NO
+)
 
 # set(MEASURE_SOURCES )
 
@@ -53,7 +57,9 @@ set(SOURCES ../src/ResidualGraph.cpp ../src/DijkstraFattestPath.cpp)
 # endforeach( measure_source ${MEASURE_SOURCES} )
 
 set(TESTS_SOURCES tests/tests_residual_graph.cpp
-				  tests/tests_dijkstrafattestpath.cpp)
+				  tests/tests_dijkstrafattestpath.cpp
+				  tests/tests_ff_fattest_path.cpp
+				  tests/tests_dimacs_reader.cpp)
 
 foreach( tests_source ${TESTS_SOURCES} )
 	get_filename_component(tests_name ${tests_source} NAME_WE)

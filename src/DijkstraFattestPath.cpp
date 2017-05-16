@@ -11,22 +11,23 @@ using namespace std;
 
 void DijkstraFattestPath::run(){
 	came_from.resize(graph.number_vertices(), nullptr);
-	min_to.resize(graph.number_vertices(), 0.0);
+	min_to.resize(graph.number_vertices(), 0);
 	vector<bool> visited(graph.number_vertices(), false);
 
-	NAryHeap<double, greater<double>> pq(2, graph.number_vertices());
+	NAryHeap<size_t, greater<size_t>> pq(2, graph.number_vertices());
 
-	min_to[source] = numeric_limits<double>::max();
+	min_to[source] = numeric_limits<size_t>::max();
 	pq.push( source, min_to[source] );
 
 	while(!pq.empty()){
 		auto v = pq.pop();
 		num_pops++;
+		if( stop_to && v == to ) break;
 		visited[v]  = true;
 
 		for(const auto& edge: graph.adjacents(v)){
 			if( !visited[edge->get_to()] ){
-				if(min_to[edge->get_to()] == 0.0){
+				if(min_to[edge->get_to()] == 0 /*&& min(min_to[v], edge->get_capacity(v)) > 0*/){
 					min_to[edge->get_to()] = min(min_to[v], edge->get_capacity(v));
 					came_from[edge->get_to()] = edge;
 					num_pushes++;
