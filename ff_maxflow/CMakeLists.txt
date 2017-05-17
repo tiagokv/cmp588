@@ -41,6 +41,15 @@ set_target_properties(push_relabel_boost PROPERTIES
     CXX_EXTENSIONS NO
 )
 
+add_executable(ff_fattest_path ff_fattest_path.cpp ${SOURCES})
+
+set_target_properties(ff_fattest_path PROPERTIES
+    CXX_STANDARD 11
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS NO
+)
+
+
 # set(MEASURE_SOURCES )
 
 # #For each *.cpp file in /measure folder, generate a executable

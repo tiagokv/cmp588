@@ -4,8 +4,8 @@
 #include "DijkstraFattestPath.hpp"
 
 void FordFulkersonFattestPath::run(){
-	auto max_iterations = std::log(graph.get_total_capacities());
-	while(true){
+	auto max_iterations = std::log(graph.get_total_capacities()) + 1;
+	while(true){ //even if something is not correct, do not take forever here
 		DijkstraFattestPath fat(graph, source, target);
 		auto fattest_path = fat.get_fattest_path();
 		if( !fattest_path.empty() ){

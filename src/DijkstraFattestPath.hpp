@@ -30,7 +30,7 @@ public:
 	DijkstraFattestPath(const ResidualGraph& graph, size_t source, size_t to): graph(graph), 
 																			   source(source), 
 																			   to(to), 
-																			   stop_to(false){
+																			   stop_to(true){
 		run();
 	};
 	
