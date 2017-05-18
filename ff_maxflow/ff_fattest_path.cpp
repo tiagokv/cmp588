@@ -14,5 +14,6 @@ int main(int argc, char **argv) {
 
     FordFulkersonFattestPath fffat(*graph, source, target);
 
-    cout << "The max flow from " << source << " to " << target << " is " << fffat.get_max_flow() << endl;
+    cout << "The max flow from " << source << " to " << target << " is " 
+    	 << fffat.get_max_flow() << " doing " << fffat.get_iterations() << " iterations" << endl;
 }

@@ -24,6 +24,10 @@ public:
 		current_capacity += flow;
 	};
 
+	void reduce_flow(size_t flow){
+		current_capacity -= flow;
+	}
+
 	size_t get_from(){
 		return from;
 	};

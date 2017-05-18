@@ -1,6 +1,8 @@
 #ifndef FORDFULKERSONFATTESTPATH_HPP
 #define FORDFULKERSONFATTESTPATH_HPP
 
+#include <cmath>
+
 #include "ResidualGraph.hpp"
 
 class FordFulkersonFattestPath{
@@ -9,7 +11,7 @@ class FordFulkersonFattestPath{
 	size_t target;
 
 	unsigned iterations;
-	double max_flow;
+	size_t max_flow;
 
 	void run();
 
@@ -18,17 +20,21 @@ public:
 																				 source(source), 
 																				 target(target),
 																				 iterations(0),
-																				 max_flow(0.0) {
+																				 max_flow(0) {
 		run();
 	};
 
-	double get_max_flow(){
+	size_t get_max_iterations(){
+		return 2 * graph.number_edges() * std::log(graph.get_total_capacities()) + 1;
+	}
+
+
+	size_t get_max_flow(){
 		return max_flow;
 	};
 
 	unsigned get_iterations(){ 
 		return iterations; 
 	};
-	// constante C = sum(Capacities) ou (n-1)*max(Capacities)
 };
 #endif

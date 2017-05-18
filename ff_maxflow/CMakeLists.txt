@@ -24,7 +24,12 @@ endif()
 add_subdirectory(${CMAKE_BINARY_DIR}/googletest-src
                  ${CMAKE_BINARY_DIR}/googletest-build)
 
-include_directories($ENV{BOOST_ROOT})
+#include_directories($ENV{BOOST_ROOT})
+#link_directories("$ENV{BOOST_ROOT}/stage/lib/")
+set(Boost_USE_STATIC_LIBS        ON) # only find static libs
+find_package(Boost 1.63 REQUIRED COMPONENTS filesystem system)
+include_directories(${Boost_INCLUDE_DIRS})
+
 include_directories(../src)
 
 set(SOURCES ../src/ResidualGraph.cpp
@@ -49,21 +54,20 @@ set_target_properties(ff_fattest_path PROPERTIES
     CXX_EXTENSIONS NO
 )
 
+set(MEASURE_SOURCES measure/measure_fffatest_path.cpp)
 
-# set(MEASURE_SOURCES )
-
-# #For each *.cpp file in /measure folder, generate a executable
-# foreach( measure_source ${MEASURE_SOURCES} )
-# 	#string( REPLACE ".cpp" "" measure_name ${measure_source} )
-# 	get_filename_component(measure_name ${measure_source} NAME_WE)
-# 	add_executable( ${measure_name} ${measure_source} ${SOURCES} )
-
-# 	set_target_properties(${measure_name} PROPERTIES
-# 	    CXX_STANDARD 11
-# 	    CXX_STANDARD_REQUIRED YES
-# 	    CXX_EXTENSIONS NO
-# 	)
-# endforeach( measure_source ${MEASURE_SOURCES} )
+#For each *.cpp file in /measure folder, generate a executable
+foreach( measure_source ${MEASURE_SOURCES} )
+	#string( REPLACE ".cpp" "" measure_name ${measure_source} )
+	get_filename_component(measure_name ${measure_source} NAME_WE)
+	add_executable( ${measure_name} ${measure_source} ${SOURCES} )
+	target_link_libraries(${measure_name} ${Boost_LIBRARIES})
+	set_target_properties(${measure_name} PROPERTIES
+	    CXX_STANDARD 11
+	    CXX_STANDARD_REQUIRED YES
+	    CXX_EXTENSIONS NO
+	)
+endforeach( measure_source ${MEASURE_SOURCES} )
 
 set(TESTS_SOURCES tests/tests_residual_graph.cpp
 				  tests/tests_dijkstrafattestpath.cpp

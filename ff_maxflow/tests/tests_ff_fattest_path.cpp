@@ -73,13 +73,13 @@ TEST_P(FFFatestPathTest, AssertMaxFlowFromFile){
 INSTANTIATE_TEST_CASE_P(FFFattestPathTests, FFFatestPathTest,
                         Values(test_file("mesh_4_4_130.gr", 130),
                                test_file("mesh_4_4_438.gr", 438),
-                               // test_file("basicLine_100_100_459122.gr", 459122)
-                               // test_file("DExpLine_100_100_10_1000000.gr", 1000000),
+                               test_file("basicLine_100_100_459122.gr", 459122),
+                               test_file("DExpLine_100_100_10_1000000.gr", 1000000),
                                test_file("dinicBad_100_101.gr", 101),
                                test_file("goldBad_100_100.gr", 100),
-                               test_file("matching_100_100_100.gr", 100)
-                               // test_file("random2Level_100_100_73099.gr", 73099)
-                               // test_file("randomLevel_100_100_73099.gr", 73099)
+                               test_file("matching_100_100_100.gr", 100),
+                               test_file("random2Level_100_100_73099.gr", 73099),
+                               test_file("randomLevel_100_100_73099.gr", 73099)
                                // test_file("squareMesh_100_100_300000.gr", 300000) takes too long to test :)
                                ));
 
