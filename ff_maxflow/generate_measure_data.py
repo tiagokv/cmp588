@@ -7,8 +7,10 @@ if "build" not in list(os.listdir(".")):
 	sys.exit(1)
 
 if "new_washington" not in list(os.listdir("./build")):
-	print("first compile new_washington graph generator")
-	sys.exit(1)
+	subprocess.check_output(["gcc", "-O3", "new_washington.c", "-o", "build/new_washington"])
+	if "new_washington" not in list(os.listdir("./build")):
+		print("compilation error for new_washington graph generator")
+		sys.exit(1)
 
 exec_file = "./build/new_washington"
 dir_path = "./measure/data/"

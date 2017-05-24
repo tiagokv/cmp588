@@ -7,11 +7,11 @@ The *measure* folders usually contains exec file source-codes that output a tabl
 
 The *tests* contain unit tests in Google Test framework.
 
-Sometimes, boost library is used for checking the correctness of a algorithm being check.
+Sometimes, boost library is used for checking the correctness of a algorithm being check or even as helper library.
 
 Dependencies:
 
-- Boost (Download it and set BOOST_ROOT)
+- Boost (Download & **Compile** it and set BOOST_ROOT)
 - Google Test (It will download it automatically)
 
 *Parental Advisory*: I'm not an expert with neither CMake, g++ and C++. Hence, probably, you will find a newbie setup but functionable (I hope).
