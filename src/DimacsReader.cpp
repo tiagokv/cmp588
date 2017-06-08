@@ -100,3 +100,36 @@ shared_ptr<Graph> DimacsReader::read_graph(std::istream& in){
 
     return graph;
 }
+
+shared_ptr<MatchingGraph> DimacsReader::read_matching_graph(std::string filepath){
+    fstream dimacs_file(filepath);
+    return read_matching_graph(dimacs_file);
+}
+
+shared_ptr<MatchingGraph> DimacsReader::read_matching_graph(std::istream& in){
+    auto graph = make_shared<MatchingGraph>();
+	string line="", dummy;
+	while (line.substr(0,4) != "p sp")
+		getline(in,line);
+	
+  // (1) get nodes and edges
+	stringstream linestr;
+	linestr.str(line);
+    size_t number_vertices, number_edges;
+	linestr >> dummy >> dummy >> number_vertices >> number_edges;
+	graph->reserve(number_vertices);
+	unsigned i=0;
+	while (i < number_edges) {
+		getline(in,line);
+		if (line.substr(0,2) == "e ") {
+			stringstream arc(line);
+			unsigned u, v;
+			char ac;
+			arc >> ac >> u >> v;
+      		graph->connect(static_cast<size_t>(u-1), static_cast<size_t>(v-1));
+			i++;
+		}
+	}
+
+    return graph;
+}

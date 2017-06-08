@@ -7,6 +7,7 @@
 
 #include "Graph.hpp"
 #include "ResidualGraph.hpp"
+#include "MatchingGraph.hpp"
 
 class DimacsReader{
     public:
@@ -15,6 +16,9 @@ class DimacsReader{
 
         std::shared_ptr<Graph> read_graph(std::string filepath);
         std::shared_ptr<Graph> read_graph(std::istream& in);
+
+        std::shared_ptr<MatchingGraph> read_matching_graph(std::string filepath);
+        std::shared_ptr<MatchingGraph> read_matching_graph(std::istream& in);
 };
 
 #endif
