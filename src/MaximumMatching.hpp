@@ -2,84 +2,66 @@
 #define MAXIMUM_MATCHING_HPP
 
 #include <memory>
+#include <vector>
+#include <limits>
 
 #include "MatchingGraph.hpp"
 
 class MaximumMatching{
-
+protected:
 	// Matching Graph, the left side goes from [0, number_vertices()/2) and 
 	// the right [number_vertices()/2, number_vertices()) 
 	std::shared_ptr<MatchingGraph> graph;
 
 	//Stores all mates, with 0 being free and 1 being vertex 0, etc...
 	std::vector<size_t> mates;
+	std::vector<size_t> dist;
 	size_t cardinality;
+	size_t phases;
+	size_t max_iterations;
 
-public:
-	MaximumMatching(std::shared_ptr<MatchingGraph> graph):graph(graph), cardinality(0){
+	size_t get_mate(const size_t& v){
+		return mates[v] - 1;
+	}
 
-		//Starts with everyone free
-		mates.resize(graph->number_vertices()); 
-		extract_paths();
-	};
-
-	void extract_paths(){
-		while(cardinality < graph->number_vertices() / 2){
-			auto visited = search_paths();
-			for(const auto& v: visited){
-				
-			}
-		}
-	};
+	bool dfs(const size_t& v);
 
 	auto end_left(){
 		return begin(mates) + graph->number_vertices() / 2;
 	};
 
-	auto is_vert_free(const size_t& i){
-		return mates[i] > 0;
-	}
+	bool is_vert_free(const size_t& i){
+		return mates[i] == 0;
+	};
 
-	vector<bool> search_paths(){
-		vector<bool> visited( graph->number_vertices() , false);
-		vector<size_t> distance(graph->number_vertices());
+	bool search_paths();
 
-		vector<size_t> u1;
+	void extract_paths();
 
-		for(size_t i = 0; i < mates.size(); i++){
-			if(is_vert_free(i)) u1.push_back(i);
-		}
+	std::vector<size_t> get_free_vert_left();
 
-		bool found = false;
-		do{
-			vector<size_t> u2;
-			for(const auto& u: u1){
-				visited[u] = true;
-				for(const auto& v: graph->adjacents(u)){
-					if( visited[v] == false ){
-						distance[v] = distance[u] + 1;
-						u2.push_back(v);
-					}
-				}
-			}
+	std::vector<size_t> select_from_right(const std::vector<size_t>& left, std::vector<bool>& visited);
+	std::vector<size_t> select_from_left(const std::vector<size_t>& right, std::vector<bool>& visited, bool& found);
 
-			found = false;
-			u1.clear();
-			for(const auto& u: u2){
-				visited[u] = true;
-				if( is_vert_free(i) ){
-					found = true;
-					break;
-				}else{
-					auto mate = mates[u] - 1;
-					if( visited[mate] == false ){
-						distance[mate] = distance[u] + 1;
-						u1.push_back(mate);
-					}
-				}
-			}
-		}while(found == true);
-	}
+public:
+	MaximumMatching(std::shared_ptr<MatchingGraph> graph):graph(graph), 
+														  cardinality(0),
+														  phases(0),
+														  max_iterations(0){
+
+		//Starts with everyone free
+		mates.resize(graph->number_vertices(), 0);
+		dist.resize(graph->number_vertices(), std::numeric_limits<size_t>::max());
+		extract_paths();
+	};
+
+	size_t get_cardinality(){
+		return cardinality;
+	};
+
+	size_t get_phases(){
+		return phases;
+	};
 
 };
 

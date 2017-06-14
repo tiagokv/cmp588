@@ -32,46 +32,54 @@ include_directories(${Boost_INCLUDE_DIRS})
 
 include_directories(../src)
 
-set(SOURCES )
+set(SOURCES ../src/MaximumMatching.cpp
+			../src/DimacsReader.cpp
+			../src/ResidualGraph.cpp
+			../src/Graph.cpp
+			../src/FordFulkersonFattestPath.cpp
+			../src/DijkstraFattestPath.cpp)
 
 add_executable(match_edmonds_boost match_edmonds_boost.cpp ${SOURCES})
-
 set_target_properties(match_edmonds_boost PROPERTIES
     CXX_STANDARD 14
     CXX_STANDARD_REQUIRED YES
     CXX_EXTENSIONS NO
 )
 
-#set(MEASURE_SOURCES measure/measure_fffatest_path.cpp)
+add_executable(match_hopcroft_karp match_hopcroft_karp.cpp ${SOURCES})
+set_target_properties(match_hopcroft_karp PROPERTIES
+    CXX_STANDARD 14
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS NO
+)
+
+set(MEASURE_SOURCES measure/measure_hopcroft_karp.cpp)
 
 #For each *.cpp file in /measure folder, generate a executable
-#foreach( measure_source ${MEASURE_SOURCES} )
+foreach( measure_source ${MEASURE_SOURCES} )
 	#string( REPLACE ".cpp" "" measure_name ${measure_source} )
-#	get_filename_component(measure_name ${measure_source} NAME_WE)
-#	add_executable( ${measure_name} ${measure_source} ${SOURCES} )
-#	target_link_libraries(${measure_name} ${Boost_LIBRARIES})
-#	set_target_properties(${measure_name} PROPERTIES
-#	    CXX_STANDARD 11
-#	    CXX_STANDARD_REQUIRED YES
-#	    CXX_EXTENSIONS NO
-#	)
-#endforeach( measure_source ${MEASURE_SOURCES} )
+	get_filename_component(measure_name ${measure_source} NAME_WE)
+	add_executable( ${measure_name} ${measure_source} ${SOURCES} )
+	target_link_libraries(${measure_name} ${Boost_LIBRARIES})
+	set_target_properties(${measure_name} PROPERTIES
+	    CXX_STANDARD 14
+	    CXX_STANDARD_REQUIRED YES
+	    CXX_EXTENSIONS NO
+	)
+endforeach( measure_source ${MEASURE_SOURCES} )
 
-#set(TESTS_SOURCES tests/tests_residual_graph.cpp
-#				  tests/tests_dijkstrafattestpath.cpp
-#				  tests/tests_ff_fattest_path.cpp
-#				  tests/tests_dimacs_reader.cpp)
-#
-#foreach( tests_source ${TESTS_SOURCES} )
-#	get_filename_component(tests_name ${tests_source} NAME_WE)
-#	add_executable(${tests_name} ${tests_source} ${SOURCES})
-#	set_target_properties(${tests_name} PROPERTIES
-#	    CXX_STANDARD 11
-#	    CXX_STANDARD_REQUIRED YES
-#	    CXX_EXTENSIONS NO
-#	)
-#	target_link_libraries(${tests_name} gtest_main)
-#	add_test(${tests_name} ${tests_name})
-#endforeach( tests_source ${TESTS_SOURCES} )
+set(TESTS_SOURCES tests/tests_match_hh.cpp)
+
+foreach( tests_source ${TESTS_SOURCES} )
+	get_filename_component(tests_name ${tests_source} NAME_WE)
+	add_executable(${tests_name} ${tests_source} ${SOURCES})
+	set_target_properties(${tests_name} PROPERTIES
+	    CXX_STANDARD 14
+	    CXX_STANDARD_REQUIRED YES
+	    CXX_EXTENSIONS NO
+	)
+	target_link_libraries(${tests_name} gtest_main)
+	add_test(${tests_name} ${tests_name})
+endforeach( tests_source ${TESTS_SOURCES} )
 
 

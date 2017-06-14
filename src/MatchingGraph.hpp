@@ -18,6 +18,8 @@ public:
 
 	void connect(const size_t& from, const size_t& to){
 		connections[from].push_back(to);
+		connections[to].push_back(from);
+		nro_edges++;
 	}
 
 	void reserve(const size_t& size){
@@ -25,7 +27,7 @@ public:
 	}
 
 	const std::vector<size_t>& adjacents(const size_t& vert){
-		return connections[from];
+		return connections[vert];
 	}
 
 	size_t number_vertices() const{

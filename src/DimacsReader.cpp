@@ -1,6 +1,7 @@
 #include <sstream>
 #include <cstdlib>
 #include <fstream>
+#include <chrono>
 
 #include "DimacsReader.hpp"
 
@@ -107,9 +108,14 @@ shared_ptr<MatchingGraph> DimacsReader::read_matching_graph(std::string filepath
 }
 
 shared_ptr<MatchingGraph> DimacsReader::read_matching_graph(std::istream& in){
+	chrono::system_clock::time_point t = chrono::system_clock::now();
+	//Usually this both functions below enables faster processing
+	ios_base::sync_with_stdio(false); // unsync C-io with C++-io
+	cin.tie(nullptr); // remove sync from cout and cin
+
     auto graph = make_shared<MatchingGraph>();
 	string line="", dummy;
-	while (line.substr(0,4) != "p sp")
+	while (line.substr(0,6) != "p edge")
 		getline(in,line);
 	
   // (1) get nodes and edges
@@ -130,6 +136,11 @@ shared_ptr<MatchingGraph> DimacsReader::read_matching_graph(std::istream& in){
 			i++;
 		}
 	}
+
+	chrono::milliseconds time = chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now()-t);
+
+	cerr << "Succesfully loaded graph with " << graph->number_vertices() << " vertices and "
+		 << graph->number_edges() << " edges in " << time.count() << "ms" << endl;
 
     return graph;
 }
