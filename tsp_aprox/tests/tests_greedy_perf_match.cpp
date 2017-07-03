@@ -15,7 +15,7 @@ TEST(GreedyPerfMatachingTests, TwoVertices){
 	vertices.push_back(vertex(0, graph));
 	vertices.push_back(vertex(1, graph));
 
-	gredy_perfect_matching gpm;
+	greedy_perfect_matching gpm;
 	auto edges = gpm(graph, vertices);
 
 	ASSERT_EQ(1, edges.size());
@@ -49,7 +49,7 @@ TEST(GreedyPerfMatachingTests, FourVertices){
 	vertices.push_back(vertex(2, graph));
 	vertices.push_back(vertex(3, graph));
 
-	gredy_perfect_matching gpm;
+	greedy_perfect_matching gpm;
 	auto edges = gpm(graph, vertices);
 
 	ASSERT_EQ(2, edges.size());

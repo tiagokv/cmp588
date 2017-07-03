@@ -4,6 +4,8 @@
 #include <memory>
 #include <iostream>
 #include <queue>
+#include <limits>
+#include <stack>
 
 using namespace std;
 
@@ -18,10 +20,10 @@ using namespace boost;
 
 using Point2d = pair<double, double>;
 
-size_t get_euclidian_dist2d(Point2d v, Point2d u){
+int get_euclidian_dist2d(const Point2d& v, const Point2d& u){
 	double xd = v.first - u.first;
     double yd = v.second - u.second;
-    return static_cast<size_t>(sqrt(xd*xd+yd*yd));
+    return static_cast<int>(sqrt(xd*xd+yd*yd));
 }
 
 template<typename T>
@@ -39,13 +41,11 @@ TSPGraph read_tsp(std::istream& f){
 	const string eof_keyword = "EOF";
 	const string node_section_keyword = "NODE_COORD_SECTION";
 
-	string line;
-
 	size_t size;
 	vector<Point2d> vertices;
 	while(true){
 
-		line = get_next<string>(f);
+		string line = get_next<string>(f);
 
 		if( line.compare(0, dimension_keyword.size(), dimension_keyword) == 0 ){
 			size = get_next<size_t>(f);
@@ -63,15 +63,19 @@ TSPGraph read_tsp(std::istream& f){
 		}
 	}
 
+	cout << "Read whole file" << endl;
+
 	TSPGraph graph(size);
 	for(size_t i = 0; i < size; i++){
-		for(size_t j = 0; j < size; j++ ){
+		for(size_t j = i + 1; j < size; j++ ){
 			if( i != j ){
 				EdgeInformation edgeProp {get_euclidian_dist2d(vertices[i], vertices[j])};
-				auto edge = add_edge(i, j, edgeProp, graph);
+				add_edge(i, j, edgeProp, graph);
 			}
 		}
 	}
+
+	cout << "Computed whole graph" << endl;
 
 	return graph;
 }
@@ -106,30 +110,57 @@ vector<TSPEdge> minweight_perfect_matching::operator()(const TSPGraph& graph, co
 	return edges;
 }
 
-vector<TSPEdge> gredy_perfect_matching::operator()(const TSPGraph& graph, const vector<TSPNode>& nodes){
-	auto cmp = [=](const TSPEdge& lhs, const TSPEdge& rhs){ return graph[lhs].weight > graph[rhs].weight; };
-	priority_queue<TSPEdge, vector<TSPEdge>, decltype(cmp)> pq(cmp);
+vector<TSPEdge> greedy_perfect_matching::operator()(const TSPGraph& graph, const vector<TSPNode>& nodes){
 
-	for(size_t u = 0; u < nodes.size(); u++ ){
-		for(size_t v = u + 1; v < nodes.size(); v++){
-			pq.push(edge(nodes[u], nodes[v], graph).first);
-		}
-	}
-
+	const auto max_value = numeric_limits<decltype(EdgeInformation::weight)>::max();
 	vector<bool> visited(nodes.size(), false);
 	vector<TSPEdge> edges;
-	auto quantity_edges = nodes.size() / 2;
-	while(edges.size() < quantity_edges && !pq.empty()){
-		auto edge = pq.top();
-		auto s = source(edge, graph);
-		auto t = target(edge, graph);
-		if( visited[s] == false && visited[t] == false ){
-			edges.push_back(edge);
-			visited[s] = true;
-			visited[t] = true;				
+
+	for(size_t u = 0; u < nodes.size(); u++){
+
+		if( visited[u] ) continue;
+		auto min = max_value;
+		auto min_node = u;
+
+		for(size_t v = u + 1; v < nodes.size(); v++){
+			auto weight = graph[edge(nodes[u], nodes[v], graph).first].weight;
+			if( u != v && visited[v] == false && weight < min){
+				min = weight;
+				min_node = v;
+			}
 		}
-		pq.pop();
+
+		visited[u] = true;
+		visited[min_node] = true;
+
+		edges.push_back( edge(nodes[u], nodes[min_node], graph).first );
 	}
+
+	return edges;
+
+	// auto cmp = [=](const TSPEdge& lhs, const TSPEdge& rhs){ return graph[lhs].weight > graph[rhs].weight; };
+	// priority_queue<TSPEdge, vector<TSPEdge>, decltype(cmp)> pq(cmp);
+
+	// for(size_t u = 0; u < nodes.size(); u++ ){
+	// 	for(size_t v = u + 1; v < nodes.size(); v++){
+	// 		pq.push(edge(nodes[u], nodes[v], graph).first);
+	// 	}
+	// }
+
+	// vector<bool> visited(nodes.size(), false);
+	// vector<TSPEdge> edges;
+	// auto quantity_edges = nodes.size() / 2;
+	// while(edges.size() < quantity_edges && !pq.empty()){
+	// 	auto edge = pq.top();
+	// 	auto s = source(edge, graph);
+	// 	auto t = target(edge, graph);
+	// 	if( visited[s] == false && visited[t] == false ){
+	// 		edges.push_back(edge);
+	// 		visited[s] = true;
+	// 		visited[t] = true;				
+	// 	}
+	// 	pq.pop();
+	// }
 
 	return edges;
 }
@@ -167,15 +198,16 @@ vector<TSPNode> filter_even_degrees(const TSPGraph& graph, const vector<TSPEdge>
 		}
 	}
 
+	assert( odd_nodes.size() % 2 == 0 );
 	return odd_nodes;
 }
 
-void backtrack_euler_circuit(const TSPGraph& graph, TSPNode& current, vector<vector<bool>>& visited, vector<TSPNode>& circuit){
+void backtrack_euler_circuit(const TSPGraph& graph, TSPNode& current, vector<vector<int>>& visited, vector<TSPNode>& circuit){
 	auto adjacent_pair = adjacent_vertices(current, graph);
 	for(auto it = adjacent_pair.first; it != adjacent_pair.second; it++){
-		if(visited[current][*it] == false){
-			visited[current][*it] = true;
-			visited[*it][current] = true;
+		if(visited[current][*it] > 0){
+			visited[current][*it]--;
+			visited[*it][current]--;
 			TSPNode next = *it;
 			backtrack_euler_circuit(graph, next, visited, circuit);
 		}
@@ -185,26 +217,85 @@ void backtrack_euler_circuit(const TSPGraph& graph, TSPNode& current, vector<vec
 
 vector<TSPEdge> euler_circuit(const TSPGraph& graph, const vector<TSPEdge>& edges){
 	//we can start from any node as there are only even nodes
-	vector<vector<bool>> visited(num_vertices(graph));
+	// vector<vector<int>> visited(num_vertices(graph));
+	// for(auto& v: visited){
+	// 	v.resize(num_vertices(graph), 0);
+	// }
+
+	// size_t quantity_edges = 0;
+	// for(const auto& edge: edges){
+	// 	auto s = source(edge, graph);
+	// 	auto t = target(edge, graph);
+	// 	//as this is a multigraph, parallel edges are allowed
+	// 	visited[s][t]++; 
+	// 	visited[t][s]++;
+	// 	quantity_edges++;
+	// }
+
+	// vector<TSPNode> euler_circuit_nodes;
+	// TSPNode s = source(edges[0], graph);
+	// backtrack_euler_circuit(graph, s, visited, euler_circuit_nodes);
+
+	// vector<TSPEdge> edges_out;
+	// auto rit = euler_circuit_nodes.rbegin();
+	// TSPNode	nodeBef = *rit;
+	// for(rit++; rit != euler_circuit_nodes.rend(); rit++){
+	// 	edges_out.push_back(edge(nodeBef, *rit, graph).first);
+	// 	nodeBef = *rit;
+	// }
+
+	// return edges_out;
+
+	vector<vector<int>> visited(num_vertices(graph));
 	for(auto& v: visited){
-		v.resize(num_vertices(graph), true);
+		v.resize(num_vertices(graph), 0);
 	}
 
 	for(const auto& edge: edges){
 		auto s = source(edge, graph);
 		auto t = target(edge, graph);
-		visited[s][t] = false;
-		visited[t][s] = false;
+		//as this is a multigraph, parallel edges are allowed
+		visited[s][t]++; 
+		visited[t][s]++;
 	}
 
-	vector<TSPNode> euler_circuit_nodes;
-	TSPNode s = source(edges[0], graph);
-	backtrack_euler_circuit(graph, s, visited, euler_circuit_nodes);
+	// Maintain a stack to keep vertices
+    stack<TSPNode> curr_path;
+ 
+    // vector to store final circuit
+    vector<TSPNode> circuit;
+	
+	auto current = source(edges[0], graph);
+
+	curr_path.push(current);
+	while( !curr_path.empty() ){
+
+		auto to_be_visited = numeric_limits<size_t>::max();
+		for(size_t i = 0; i < visited.size(); i++){
+			if(visited[current][i] > 0){
+				to_be_visited = i;
+				break;
+			}
+		}
+
+		if( to_be_visited != numeric_limits<size_t>::max()){
+			curr_path.push(current);
+
+			visited[current][to_be_visited]--;
+			visited[to_be_visited][current]--;
+
+			current = to_be_visited;
+		}else{
+			circuit.push_back(current);
+			current = curr_path.top();
+			curr_path.pop();
+		}
+	}
 
 	vector<TSPEdge> edges_out;
-	auto rit = euler_circuit_nodes.rbegin();
+	auto rit = circuit.rbegin();
 	TSPNode	nodeBef = *rit;
-	for(rit++; rit != euler_circuit_nodes.rend(); rit++){
+	for(rit++; rit != circuit.rend(); rit++){
 		edges_out.push_back(edge(nodeBef, *rit, graph).first);
 		nodeBef = *rit;
 	}
@@ -220,15 +311,21 @@ vector<TSPEdge> transform_to_hamiltonian_circuit(const TSPGraph& graph, vector<T
 	for(const auto& e: edges){
 		auto s = source(e, graph);
 		auto t = target(e, graph);
-		if( ref == null_node && visited[t] == false ){
-			hamiltonian_circuit.push_back(e);
-			visited[t] = true;
-		}else if( ref != null_node && visited[t] == false ){
-			hamiltonian_circuit.push_back(edge(ref, vertex(t, graph), graph).first);
-			visited[ref] = true;
-			ref = null_node;
+		if( ref == null_node ){
+			if( visited[t] == false ){
+				hamiltonian_circuit.push_back(e);
+				visited[t] = true;
+			}else{
+				ref = s;
+			}
 		}else{
-			ref = s;
+			if( visited[t] == false ){
+				hamiltonian_circuit.push_back(edge(ref, vertex(t, graph), graph).first);
+				visited[ref] = true;
+				ref = null_node;
+			}else{
+				// let it be the first ref the source, continue till find another feasible target
+			}
 		}
 		visited[s] = true;
 	}
@@ -239,26 +336,30 @@ vector<TSPEdge> transform_to_hamiltonian_circuit(const TSPGraph& graph, vector<T
 }
 
 void merge_edges(const TSPGraph& graph, vector<TSPEdge>& prim_edges, const vector<TSPEdge>& pf_edges){
-	vector<vector<bool>> visited(num_vertices(graph));
-	for(auto& v: visited){
-		v.resize(num_vertices(graph), false);
-	}
+	// vector<vector<bool>> visited(num_vertices(graph));
+	// for(auto& v: visited){
+	// 	v.resize(num_vertices(graph), false);
+	// }
 
-	std::vector<TSPEdge> edges_merged;
-	for(const auto& edge: prim_edges){
-		auto s = source(edge, graph);
-		auto t = target(edge, graph);
-		visited[s][t] = true;
-		visited[t][s] = true;
-	}
+	// std::vector<TSPEdge> edges_merged;
+	// for(const auto& edge: prim_edges){
+	// 	auto s = source(edge, graph);
+	// 	auto t = target(edge, graph);
+	// 	visited[s][t] = true;
+	// 	visited[t][s] = true;
+	// }
 
-	for(const auto& edge: pf_edges){
-		auto s = source(edge, graph);
-		auto t = target(edge, graph);
-		if( visited[s][t] == false && visited[t][s] == false ){
-			prim_edges.push_back( edge );
-		}
-	}
+	// for(const auto& edge: pf_edges){
+	// 	auto s = source(edge, graph);
+	// 	auto t = target(edge, graph);
+	// 	if( visited[s][t] == false && visited[t][s] == false ){
+	// 		prim_edges.push_back( edge );
+	// 	}
+	// }
+
+	prim_edges.insert(prim_edges.end(), pf_edges.begin(), pf_edges.end());
+
+	assert( only_even_degree(graph, prim_edges) );
 }
 
 bool visits_all(const TSPGraph& graph, const std::vector<TSPEdge>& edges){
@@ -275,4 +376,24 @@ bool visits_all(const TSPGraph& graph, const std::vector<TSPEdge>& edges){
 	}
 
 	return vertices_to_visit == 0;
+}
+
+bool only_even_degree(const TSPGraph& graph, const std::vector<TSPEdge>& edges){
+
+	vector<size_t> degrees(num_vertices(graph), 0);
+
+	for(const auto& edge: edges){
+		auto s = source(edge, graph);
+		auto t = target(edge, graph);
+		degrees[t]++;
+		degrees[s]++;
+	}
+
+	for(const auto& degree: degrees){
+		if( degree % 2 == 1 ){
+			return false;
+		}
+	}
+
+	return true;
 }
