@@ -34,6 +34,7 @@ include_directories(../src)
 include_directories(../blossom5-v2.05)
 
 set(SOURCES ../src/tsp_aprox_christofides.cpp
+			../src/tspaprox_christofides_enhanced.cpp
 			../blossom5-v2.05/PMduals.cpp
 			../blossom5-v2.05/PMexpand.cpp
 			../blossom5-v2.05/PMinterface.cpp
@@ -54,20 +55,27 @@ set_target_properties(tsp_aprox PROPERTIES
     CXX_EXTENSIONS NO
 )
 
-# set(MEASURE_SOURCES measure/measure_hopcroft_karp.cpp)
+add_executable(tsp_aprox_enhanced tsp_aprox_enhanced.cpp ${SOURCES})
+set_target_properties(tsp_aprox_enhanced PROPERTIES
+    CXX_STANDARD 14
+    CXX_STANDARD_REQUIRED YES
+    CXX_EXTENSIONS NO
+)
 
-# #For each *.cpp file in /measure folder, generate a executable
-# foreach( measure_source ${MEASURE_SOURCES} )
-# 	#string( REPLACE ".cpp" "" measure_name ${measure_source} )
-# 	get_filename_component(measure_name ${measure_source} NAME_WE)
-# 	add_executable( ${measure_name} ${measure_source} ${SOURCES} )
-# 	target_link_libraries(${measure_name} ${Boost_LIBRARIES})
-# 	set_target_properties(${measure_name} PROPERTIES
-# 	    CXX_STANDARD 14
-# 	    CXX_STANDARD_REQUIRED YES
-# 	    CXX_EXTENSIONS NO
-# 	)
-# endforeach( measure_source ${MEASURE_SOURCES} )
+set(MEASURE_SOURCES measure/measure.cpp)
+
+#For each *.cpp file in /measure folder, generate a executable
+foreach( measure_source ${MEASURE_SOURCES} )
+	#string( REPLACE ".cpp" "" measure_name ${measure_source} )
+	get_filename_component(measure_name ${measure_source} NAME_WE)
+	add_executable( ${measure_name} ${measure_source} ${SOURCES} )
+	target_link_libraries(${measure_name} ${Boost_LIBRARIES})
+	set_target_properties(${measure_name} PROPERTIES
+	    CXX_STANDARD 14
+	    CXX_STANDARD_REQUIRED YES
+	    CXX_EXTENSIONS NO
+	)
+endforeach( measure_source ${MEASURE_SOURCES} )
 
 set(TESTS_SOURCES tests/tests_mst_prim.cpp
 				  tests/tests_odd_degree.cpp
@@ -75,7 +83,8 @@ set(TESTS_SOURCES tests/tests_mst_prim.cpp
 				  tests/tests_greedy_perf_match.cpp
 				  tests/tests_eulerian_circuit.cpp
 				  tests/tests_hamiltonian_transf.cpp
-				  tests/tests_tsp_aprox.cpp)
+				  tests/tests_tsp_aprox.cpp
+				  tests/tests_enhanced_mst_prim.cpp)
 
 foreach( tests_source ${TESTS_SOURCES} )
 	get_filename_component(tests_name ${tests_source} NAME_WE)
