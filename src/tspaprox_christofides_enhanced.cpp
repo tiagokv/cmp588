@@ -242,7 +242,7 @@ void create_multigraph(const GeometricGraph& graph, std::vector<Edge>& edges_pf,
 	assert( only_even_degree(graph, edges_pf) == true );
 }
 
-bool visits_all_vertices(const GeometricGraph& graph, const vector<Edge> edges){
+bool visits_all_vertices(const GeometricGraph& graph, const vector<Edge>& edges){
 
 	vector<bool> visited(graph.number_vertices(), false);
 	for(const auto& edge: edges){
@@ -250,6 +250,7 @@ bool visits_all_vertices(const GeometricGraph& graph, const vector<Edge> edges){
 		visited[edge.to] = true;
 	}
 
+	auto a = 1;
 	return find(visited.begin(), visited.end(), false) == visited.end();
 }
 
@@ -259,8 +260,8 @@ vector<Edge> get_short_path(const GeometricGraph& graph, const vector<size_t>& c
 
 	queue<size_t> q;
 	auto ref = circuit[start];
-	for(size_t u = start + 1; u != start; u = ( u + 1 ) % circuit.size() ){
-		if( visited[circuit[u]] == true ) continue;
+	for(size_t u = (start + 1) % circuit.size(); u != start; u = ( u + 1 ) % circuit.size() ){
+		if( visited[circuit[u]] == true || circuit[u] == ref ) continue;
 		auto edge = (graph.vertices[ref] - graph.vertices[circuit[u]]);
 		edges_circuit.push_back(edge);
 		visited[ref] = true;
@@ -321,33 +322,37 @@ vector<Edge> euler_circuit_shortcutting(const GeometricGraph& graph, const vecto
 		}
 	}
 
-	auto min_distance = numeric_limits<size_t>::max();
-	auto min_node = 0;
+	// auto min_distance = numeric_limits<size_t>::max();
+	// auto min_node = 0;
 
-	for(size_t i = 0; i < circuit.size(); i++){
-		auto distance = calculate_accu(graph, circuit, i);
-		if( distance < min_distance ){
-			min_distance = distance;
-			min_node = i;
-		}
-	}
-
-	return get_short_path(graph, circuit, min_node);
-
-	// vector<Edge> edges_circuit;
-	// vector<bool> visited(graph.number_vertices());
-	// auto ref = circuit.front();
-	// for(size_t u = 1; u < circuit.size() - 1; u++){
-	// 	if( visited[circuit[u]] == true ) continue;
-	// 	auto edge = (graph.vertices[ref] - graph.vertices[circuit[u]]);
-	// 	edges_circuit.push_back(edge);
-	// 	visited[ref] = true;
-	// 	ref = circuit[u];
+	// for(size_t i = 0; i < circuit.size(); i++){
+	// 	auto distance = calculate_accu(graph, circuit, i);
+	// 	if( distance < min_distance ){
+	// 		min_distance = distance;
+	// 		min_node = i;
+	// 	}
 	// }
 
-	// edges_circuit.push_back(graph.vertices[ref] - graph.vertices[circuit.front()]);
+	// auto edges_circuit = get_short_path(graph, circuit, min_node);
 
 	// assert(visits_all_vertices(graph, edges_circuit) == true);
 
-	//return edges_circuit;
+	// return edges_circuit;
+
+	vector<Edge> edges_circuit;
+	vector<bool> visited(graph.number_vertices());
+	auto ref = circuit.front();
+	for(size_t u = 1; u < circuit.size() - 1; u++){
+		if( visited[circuit[u]] == true || circuit[u] == ref ) continue;
+		auto edge = (graph.vertices[ref] - graph.vertices[circuit[u]]);
+		edges_circuit.push_back(edge);
+		visited[ref] = true;
+		ref = circuit[u];
+	}
+
+	edges_circuit.push_back(graph.vertices[ref] - graph.vertices[circuit.front()]);
+
+	assert(visits_all_vertices(graph, edges_circuit) == true);
+
+	return edges_circuit;
 }
