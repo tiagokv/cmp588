@@ -11,8 +11,9 @@ int main(int argv, char** argc){
 	auto graph = di.read_matching_graph(cin);
 
 	MaximumMatching mm(graph);
-
-	cout << "The maximum cardinality is " << mm.get_cardinality() << endl;
-
+	auto cardinality = mm.get_cardinality();
+	cerr << "The maximum cardinality is " << cardinality << endl;
+	cout << cardinality << endl;
+	
 	return 0;
 }

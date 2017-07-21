@@ -4,6 +4,7 @@
 #include <memory>
 #include <vector>
 #include <limits>
+#include <algorithm>
 
 #include "MatchingGraph.hpp"
 
@@ -62,6 +63,14 @@ public:
 	size_t get_phases(){
 		return phases;
 	};
+
+	bool check_mates_sanity();
+
+	size_t get_cardinality_diff(){
+		return std::accumulate( mates.begin(), mates.begin() + mates.size() / 2, 0, [](const size_t& a, const size_t& b){
+			return a + (b > 0? 1 : 0);
+		});
+	}
 
 };
 
