@@ -65,6 +65,17 @@ void build_matching_graph(size_t vertices, size_t edges, shared_ptr<MatchingGrap
 	cerr << "Took " << total.count() << "ms to instantiate the graph" << endl;
 }
 
+void write_graph(shared_ptr<MatchingGraph> graph, size_t ff, size_t hh){
+	ofstream output_graph("error_graph.gr");
+	output_graph << "c Bi-partite graph ff: " << ff << " hh: " << hh << endl << endl;
+	output_graph << "p edge " << graph->number_vertices() << " " << graph->number_edges() << endl;
+	
+	for ( size_t i = 0; i < graph->number_vertices(); i++ )
+		for(const auto& adj: graph->adjacents(i))
+			output_graph << "e " << i + 1 << " " << adj + 1 << endl;
+	output_graph.close();
+}
+
 void measure(ofstream& output, bool vary_edges, int max_objs, int min_var_obj, int max_var_obj){
 	output << "Vertices Edges Phases Cardinality Repetitions HHTime FFTime" << endl;
 	for (int i = min_var_obj; i < max_var_obj; ++i){
@@ -80,6 +91,7 @@ void measure(ofstream& output, bool vary_edges, int max_objs, int min_var_obj, i
 		milliseconds totalHH(0);
 		size_t phases = 0;
 		size_t cardinality = 0;
+		size_t card_true = 0;
 		for(int i = 0; i < MAX_REP; i++){
 			system_clock::time_point t = system_clock::now();
 			MaximumMatching mm(graph);
@@ -87,6 +99,7 @@ void measure(ofstream& output, bool vary_edges, int max_objs, int min_var_obj, i
 
 			phases = mm.get_phases();
 			cardinality = mm.get_cardinality();
+			card_true = mm.get_cardinality_diff();
 		}
 
 		milliseconds totalFF(0);
@@ -100,7 +113,9 @@ void measure(ofstream& output, bool vary_edges, int max_objs, int min_var_obj, i
 
 		if( max_flow != cardinality ){
 			cerr << "Error FF: " << max_flow << " HH: " << cardinality << endl; 
-			//return;
+			cerr << "HH true:" << card_true << endl;
+			write_graph(graph, max_flow, cardinality);
+			return;
 		}
 
 		output << graph->number_vertices() << " " << graph->number_edges() << " " <<
